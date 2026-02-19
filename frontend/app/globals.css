@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  /* Backgrounds - Deep Slate / Charcoal */
+  --color-bg-primary: #020617;
+  --color-bg-secondary: #0F172A;
+  --color-bg-tertiary: #1E293B;
+
+  /* Brand / Accents */
+  --color-accent-red: #E63946;
+  --color-accent-red-dark: #9B1B24;
+  --color-accent-red-glow: rgba(230, 57, 70, 0.3);
+
+  /* Text - Cool Whites & Grays */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Status */
+  --color-success: #10B981;
+  /* Emerald */
+  --color-warning: #F59E0B;
+  /* Amber/Yellow */
+  --color-danger: #E63946;
+  --color-info: #0EA5E9;
+  /* Sky Blue */
+
+  /* Borders */
+  --color-border-primary: #1E293B;
+  --color-border-subtle: rgba(248, 250, 252, 0.06);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, #020617 0%, #0F172A 50%, #020617 100%);
+
+  /* Animations */
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #020617;
+    color: #F8FAFC;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #dc2626;
+    color: white;
+  }
+}
+
+@layer utilities {
+  .text-gradient-red {
+    background: linear-gradient(to right, #ff5252, #e53e3e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
