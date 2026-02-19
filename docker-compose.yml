@@ -1,0 +1,176 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: chainsentinel
+      POSTGRES_USER: cs_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chainsentinel_secure_2026}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cs_user -d chainsentinel" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-chainsentinel_neo4j}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4jdata:/data
+
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn gateway.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+      REDIS_URL: redis://redis:6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  intelligence-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.intelligence.agent
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  risk-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.risk.agent
+    depends_on:
+      - redis
+      - postgres
+      - neo4j
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-chainsentinel_neo4j}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  simulation-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.simulation.agent
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  optimization-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.optimization.agent
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  orchestration-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.orchestration.agent
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  learning-agent:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m agents.learning.agent
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://cs_user:${DB_PASSWORD:-chainsentinel_secure_2026}@postgres:5432/chainsentinel
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - gateway
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000/ws/live
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    working_dir: /app
+
+volumes:
+  pgdata:
+  neo4jdata:
