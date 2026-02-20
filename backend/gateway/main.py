@@ -46,6 +46,10 @@ async def lifespan(app: FastAPI):
     logger.info("ChainSentinel API Gateway stopped")
 
 
+import socketio
+
+sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+# The socket.io endpoint will be handled automatically by ASGIApp
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
@@ -59,6 +63,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@sio.event
+async def connect(sid, environ):
+    logger.info(f"SocketIO client connected: {sid}")
+
+@sio.event
+async def disconnect(sid):
+    logger.info(f"SocketIO client disconnected: {sid}")
 
 
 @app.get("/")
@@ -665,6 +677,9 @@ async def get_agent_status():
         ]
     }
 
+
+# Wrap FastAPI with the python-socketio ASGI application
+app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path="/ws/socket.io")
 
 if __name__ == "__main__":
     import uvicorn
