@@ -55,7 +55,7 @@ function TextRing({ radius }: { radius: number }) {
     // Create texture once
     const texture = useMemo(() => {
         // Red color #E63946
-        return createTextTexture("CHAINSENTINEL", "#E63946", "bold 40px 'Space Grotesk', sans-serif");
+        return createTextTexture("CHAINSENTINEL", "#FFFFFF", "bold 40px 'Space Grotesk', sans-serif");
     }, []);
 
     useFrame((state, delta) => {
