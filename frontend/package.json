@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.38.0",
+    "@clerk/themes": "^2.4.54",
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.0",
     "autoprefixer": "^10.4.20",
@@ -26,7 +27,7 @@
     "react-dom": "^19.0.0",
     "react-simple-maps": "^3.0.0",
     "recharts": "^2.15.0",
-    "socket.io-client": "^4.8.0",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^2.6.1",
     "tailwindcss": "^4.0.0",
     "three": "^0.170.0",

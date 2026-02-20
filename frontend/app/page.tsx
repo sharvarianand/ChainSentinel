@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
 import { Radar, MoveRight, ShieldCheck, Zap, Globe as GlobeIcon, Activity, Facebook, Twitter, Linkedin, Github } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { SignInButton } from '@clerk/nextjs'
+import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs'
 import { HoverEffect } from "@/components/ui/card-hover-effect"
 import { TextHoverEffect } from "@/components/ui/hover-footer"
 
@@ -104,12 +104,22 @@ export default function HomePage() {
               variants={itemVariants}
               className="flex flex-wrap items-center gap-4"
             >
-              <SignInButton mode="modal">
-                <button className="group px-8 py-4 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
-                  Launch Dashboard
-                  <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </SignInButton>
+              <SignedIn>
+                <Link href="/dashboard">
+                  <button className="group px-8 py-4 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
+                    Launch Dashboard
+                    <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard" signUpForceRedirectUrl="/dashboard">
+                  <button className="group px-8 py-4 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
+                    Launch Dashboard
+                    <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </SignInButton>
+              </SignedOut>
               <button
                 onClick={() => alert("Demo Mode activated!")}
                 className="px-8 py-4 bg-transparent text-white font-bold rounded-lg border border-border-primary hover:bg-white/5 transition-all duration-300"
@@ -173,6 +183,29 @@ export default function HomePage() {
           </div>
 
           <HoverEffect items={features} />
+
+          <div className="mt-16 flex justify-center">
+            <SignedIn>
+              <Link href="/dashboard">
+                <button className="group relative px-10 py-4 bg-bg-primary border border-accent-red/50 text-white font-bold rounded-lg hover:bg-accent-red/10 hover:border-accent-red transition-all duration-300 flex items-center gap-3 overflow-hidden shadow-[0_0_15px_rgba(230,57,70,0.1)] hover:shadow-[0_0_30px_rgba(230,57,70,0.3)]">
+                  <span className="relative z-10 uppercase tracking-widest font-mono text-sm">Let's Get Started</span>
+                  <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10 text-accent-red" />
+                  {/* Optional subtle light sweep effect */}
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[120%] group-hover:translate-x-[120%] transition-transform duration-1000 ease-in-out pointer-events-none" />
+                </button>
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal" forceRedirectUrl="/dashboard" signUpForceRedirectUrl="/dashboard">
+                <button className="group relative px-10 py-4 bg-bg-primary border border-accent-red/50 text-white font-bold rounded-lg hover:bg-accent-red/10 hover:border-accent-red transition-all duration-300 flex items-center gap-3 overflow-hidden shadow-[0_0_15px_rgba(230,57,70,0.1)] hover:shadow-[0_0_30px_rgba(230,57,70,0.3)]">
+                  <span className="relative z-10 uppercase tracking-widest font-mono text-sm">Let's Get Started</span>
+                  <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10 text-accent-red" />
+                  {/* Optional subtle light sweep effect */}
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[120%] group-hover:translate-x-[120%] transition-transform duration-1000 ease-in-out pointer-events-none" />
+                </button>
+              </SignInButton>
+            </SignedOut>
+          </div>
         </div>
       </section>
 
