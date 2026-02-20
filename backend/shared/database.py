@@ -1,8 +1,8 @@
 import asyncio
+import logging
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, ForeignKey, Text, Enum as SQLEnum, JSON
-from sqlalchemy import JSON as SQLiteJSON
 import uuid
 from datetime import datetime
 import json
@@ -10,12 +10,38 @@ import json
 from shared.config import settings
 from shared.models import SeverityLevel, DisruptionType, DisruptionStatus, SupplierStatus, ActionStatus
 
+logger = logging.getLogger(__name__)
 Base = declarative_base()
 
-engine = create_async_engine(
-    settings.database_url.replace("postgresql://", "postgresql+asyncpg://"),
-    echo=True
-)
+
+def _build_db_url(raw_url: str) -> str:
+    """Convert the configured DATABASE_URL to an async-compatible URL."""
+    if raw_url.startswith("sqlite"):
+        # Already an async sqlite URL or plain sqlite URL
+        if "aiosqlite" not in raw_url:
+            return raw_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+        return raw_url
+    # PostgreSQL
+    url = raw_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+    return url
+
+
+_db_url = _build_db_url(settings.database_url)
+_is_sqlite = _db_url.startswith("sqlite")
+
+logger.info(f"Database URL scheme: {'SQLite' if _is_sqlite else 'PostgreSQL'}")
+
+_engine_kwargs: dict = {"echo": False}
+if _is_sqlite:
+    # SQLite needs check_same_thread=False for async
+    from sqlalchemy.pool import StaticPool
+    _engine_kwargs.update(
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+engine = create_async_engine(_db_url, **_engine_kwargs)
 
 async_session = async_sessionmaker(
     engine,
@@ -30,8 +56,10 @@ async def get_db():
 
 
 async def init_db():
+    """Create all tables. Works with both SQLite and PostgreSQL."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created / verified")
 
 
 class SupplierDB(Base):
@@ -42,7 +70,7 @@ class SupplierDB(Base):
     tier = Column(Integer, nullable=False)
     region = Column(String(100), nullable=False)
     trust_score = Column(Float, default=50.0)
-    status = Column(SQLEnum(SupplierStatus), default=SupplierStatus.ACTIVE)
+    status = Column(SQLEnum(SupplierStatus, native_enum=False), default=SupplierStatus.ACTIVE)
     extra_data = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -63,15 +91,15 @@ class DisruptionDB(Base):
     __tablename__ = "disruptions"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    type = Column(SQLEnum(DisruptionType), nullable=False)
+    type = Column(SQLEnum(DisruptionType, native_enum=False), nullable=False)
     title = Column(String(500), nullable=False)
     description = Column(Text, nullable=True)
-    severity = Column(SQLEnum(SeverityLevel), nullable=False)
+    severity = Column(SQLEnum(SeverityLevel, native_enum=False), nullable=False)
     region = Column(String(100), nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     source_urls = Column(JSON, default=[])
-    status = Column(SQLEnum(DisruptionStatus), default=DisruptionStatus.DETECTED)
+    status = Column(SQLEnum(DisruptionStatus, native_enum=False), default=DisruptionStatus.DETECTED)
     detected_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
 
@@ -121,7 +149,7 @@ class ActionDB(Base):
     scenario_id = Column(String(36), ForeignKey("scenarios.id"), nullable=True)
     action_type = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(SQLEnum(ActionStatus), default=ActionStatus.PENDING)
+    status = Column(SQLEnum(ActionStatus, native_enum=False), default=ActionStatus.PENDING)
     compliance_result = Column(String(50), nullable=True)
     compliance_details = Column(JSON, nullable=True)
     executed_at = Column(DateTime, nullable=True)
@@ -204,7 +232,7 @@ class IncidentDB(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     disruption_id = Column(String(36), ForeignKey("disruptions.id"))
     title = Column(String(500), nullable=False)
-    severity = Column(SQLEnum(SeverityLevel), nullable=False)
+    severity = Column(SQLEnum(SeverityLevel, native_enum=False), nullable=False)
     region = Column(String(100), nullable=False)
     suppliers_affected = Column(Integer, default=0)
     actions_taken = Column(Integer, default=0)

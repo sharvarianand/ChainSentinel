@@ -17,12 +17,32 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    await event_bus.connect()
-    gemini_service.initialize()
+    # --- Database ---
+    try:
+        await init_db()
+        logger.info("Database initialised successfully")
+    except Exception as exc:
+        logger.error(f"Database init failed – running without persistence: {exc}")
+
+    # --- Event bus (Redis) ---
+    try:
+        await event_bus.connect()
+    except Exception as exc:
+        logger.warning(f"Event bus connect failed – using in-memory fallback: {exc}")
+
+    # --- Gemini ---
+    try:
+        gemini_service.initialize()
+    except Exception as exc:
+        logger.warning(f"Gemini init failed – using mock mode: {exc}")
+
     logger.info("ChainSentinel API Gateway started")
     yield
-    await event_bus.disconnect()
+
+    try:
+        await event_bus.disconnect()
+    except Exception:
+        pass
     logger.info("ChainSentinel API Gateway stopped")
 
 
