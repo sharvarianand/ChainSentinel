@@ -74,16 +74,16 @@ export default function HomePage() {
             {/* Badge pill */}
             <motion.div
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent-red/20 bg-accent-red/5 mb-8"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-red/20 bg-accent-red/5 mb-6"
             >
               <span className="w-2 h-2 rounded-full bg-accent-red animate-pulse shadow-[0_0_10px_#E63946]" />
-              <span className="text-xs font-mono uppercase tracking-widest text-text-secondary">Next-Generation Supply Chain Intelligence</span>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-text-secondary">Next-Generation Supply Chain Intelligence</span>
             </motion.div>
 
             {/* Giant H1 */}
             <motion.h1
               variants={itemVariants}
-              className="text-5xl md:text-7xl font-space-grotesk font-bold text-text-primary tracking-tighter leading-tight mb-6 uppercase"
+              className="text-5xl md:text-6xl lg:text-[64px] font-space-grotesk font-bold text-text-primary tracking-tighter leading-tight mb-6 uppercase"
             >
               Autonomous <br />
               <span className="text-accent-red">Supply Chain</span> <br />
@@ -93,7 +93,7 @@ export default function HomePage() {
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="text-lg md:text-xl text-text-secondary max-w-lg mb-10 leading-relaxed"
+              className="text-base md:text-lg text-text-secondary max-w-lg mb-8 leading-relaxed"
             >
               Detect threats. Decide strategies. Resolve automatically.
               The future of resilience is autonomous.
@@ -106,7 +106,7 @@ export default function HomePage() {
             >
               <SignedIn>
                 <Link href="/dashboard">
-                  <button className="group px-8 py-4 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
+                  <button className="group px-6 py-3 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
                     Launch Dashboard
                     <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -114,7 +114,7 @@ export default function HomePage() {
               </SignedIn>
               <SignedOut>
                 <SignInButton mode="modal" forceRedirectUrl="/dashboard" signUpForceRedirectUrl="/dashboard">
-                  <button className="group px-8 py-4 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
+                  <button className="group px-6 py-3 bg-accent-red text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(230,57,70,0.4)] transition-all duration-300 flex items-center gap-2">
                     Launch Dashboard
                     <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -122,7 +122,7 @@ export default function HomePage() {
               </SignedOut>
               <button
                 onClick={() => alert("Demo Mode activated!")}
-                className="px-8 py-4 bg-transparent text-white font-bold rounded-lg border border-border-primary hover:bg-white/5 transition-all duration-300"
+                className="px-6 py-3 bg-transparent text-white font-bold rounded-lg border border-border-primary hover:bg-white/5 transition-all duration-300"
               >
                 Demo Mode
               </button>
@@ -131,35 +131,37 @@ export default function HomePage() {
             {/* Quick Metrics */}
             <motion.div
               variants={itemVariants}
-              className="mt-16 grid grid-cols-3 gap-8 border-l border-border-primary pl-8"
+              className="mt-12 grid grid-cols-3 gap-8 border-l border-border-primary pl-8"
             >
               <div>
-                <div className="text-2xl font-bold font-mono text-text-primary">$12.4M</div>
+                <div className="text-xl md:text-2xl font-bold font-mono text-text-primary">$12.4M</div>
                 <div className="text-[10px] uppercase tracking-widest text-text-muted">Mitigated</div>
               </div>
               <div>
-                <div className="text-2xl font-bold font-mono text-text-primary">47ms</div>
+                <div className="text-xl md:text-2xl font-bold font-mono text-text-primary">47ms</div>
                 <div className="text-[10px] uppercase tracking-widest text-text-muted">Response</div>
               </div>
               <div>
-                <div className="text-2xl font-bold font-mono text-text-primary">99.2%</div>
+                <div className="text-xl md:text-2xl font-bold font-mono text-text-primary">99.2%</div>
                 <div className="text-[10px] uppercase tracking-widest text-text-muted">Accuracy</div>
               </div>
             </motion.div>
           </motion.div>
 
           {/* Right Column: 3D Globe */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
-            className="hidden lg:block relative h-[800px] w-full"
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[120%] h-[120%] bg-accent-red/5 rounded-full blur-[120px]" />
-            </div>
-            <CobeGlobe />
-          </motion.div>
+          <div className="hidden lg:block relative h-full w-full">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut", delay: 0.5 }}
+              className="absolute top-1/2 -translate-y-1/2 left-0 w-full aspect-square scale-90 xl:scale-95"
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-[120%] h-[120%] bg-accent-red/5 rounded-full blur-[120px]" />
+              </div>
+              <CobeGlobe className="w-full h-full" />
+            </motion.div>
+          </div>
         </div>
 
         {/* Scroll Indicator */}

@@ -69,7 +69,7 @@ function TextRing({ radius }: { radius: number }) {
     if (!texture) return null;
 
     return (
-        <mesh ref={meshRef} rotation={[0, 0, 0.1]}> {/* Slight Z tilt for style */}
+        <mesh ref={meshRef}>
             {/* 
         CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded) 
         Open ended true to remove caps.
@@ -151,7 +151,7 @@ export const CobeGlobe = ({ className }: { className?: string }) => {
     return (
         <div
             className={cn(
-                "relative w-full h-full max-w-[800px] aspect-square mx-auto flex items-center justify-center",
+                "relative w-full h-full aspect-square flex items-center justify-center",
                 className
             )}
         >

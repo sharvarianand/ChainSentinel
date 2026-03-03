@@ -60,7 +60,7 @@ export default function RootLayout({
         }
       }}
     >
-      <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+      <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
         <body className="bg-bg-primary text-text-primary antialiased font-sans flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-1">
